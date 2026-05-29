@@ -14,8 +14,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Team App',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+          primary: Colors.teal,
+          onPrimary: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black,
+          dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+          ),
+        ),
+        useMaterial3: true,
+      ),
       home: const HomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
