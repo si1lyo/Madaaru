@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class PageD extends StatelessWidget {
-  const PageD({super.key});
+class SettingPage extends StatelessWidget {
+  const SettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Page D')),
+      appBar: AppBar(title: const Text('設定')),
       body: const Center(
         child: Text('ここは担当者Dのページ'),
       ),

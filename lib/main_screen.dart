@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'page_a.dart';
-import 'page_b.dart';
-import 'page_c.dart';
-import 'page_d.dart';
-import 'page_e.dart';
+import 'home_page.dart';
+import 'calender_page.dart';
+import 'camera_page.dart';
+import 'setting_page.dart';
+import 'notification_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,11 +18,11 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const PageA(),
-    const PageB(),
-    const PageC(),
-    const PageD(),
-    const PageE(),
+    const HomePage(),
+    const CalendarPage(),
+    const CameraPage(),
+    const SettingPage(),
+    const NotificationPage(),
   ];
 
   @override
@@ -45,7 +45,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
 
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
@@ -56,23 +55,31 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             IconButton(
-              icon: const Icon(Icons.home_outlined),
-              onPressed: () => setState(() => _currentIndex = 0),
-            ),
-            IconButton(
-              icon: const Icon(Icons.calendar_month_outlined),
+              icon: Icon(
+                Icons.calendar_month_outlined,
+                color: _currentIndex == 1 ? themeColor : Colors.grey,
+              ),
               onPressed: () => setState(() => _currentIndex = 1),
             ),
 
-           // const SizedBox(width: 40),
+            IconButton(
+              icon: Icon(
+                Icons.home_outlined,
+                // 選ばれているときはテーマカラー（緑）、そうじゃないときはグレーにする
+                color: _currentIndex == 0 ? themeColor : Colors.grey,
+              ),
+              onPressed: () {
+                // タップされたら現在の番号を「0」に更新して画面を再描画する
+                setState(() => _currentIndex = 0);
+              },
+            ),
 
             IconButton(
-              icon: const Icon(Icons.notifications_outlined),
+              icon: Icon(
+                Icons.settings_outlined,
+                color: _currentIndex == 3 ? themeColor : Colors.grey,
+              ),
               onPressed: () => setState(() => _currentIndex = 3),
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings_outlined),
-              onPressed: () => setState(() => _currentIndex = 4),
             ),
           ],
         ),
