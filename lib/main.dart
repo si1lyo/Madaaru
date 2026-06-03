@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'page_a.dart';
-import 'page_b.dart';
-import 'page_c.dart';
+import 'main_screen.dart'; // 1. さっき作った main_screen.dart を読み込む
 
 void main() {
   runApp(const MyApp());
@@ -13,65 +11,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Team App',
+      title: 'まだある？',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.teal,
-          primary: Colors.teal,
-          onPrimary: Colors.white,
-          surface: Colors.white,
-          onSurface: Colors.black,
-          dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-          ),
-        ),
         useMaterial3: true,
       ),
-      home: const HomePage(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PageA()),
-              ),
-              child: const Text('Page A'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PageB()),
-              ),
-              child: const Text('Page B'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PageC()),
-              ),
-              child: const Text('Page C'),
-            ),
-          ],
-        ),
-      ),
+      home: const MainScreen(),
     );
   }
 }
