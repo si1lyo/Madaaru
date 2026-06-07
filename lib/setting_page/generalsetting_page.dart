@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:adaptive_theme/adaptive_theme.dart'; // 1. これを追加
 
 class GeneralPage extends StatefulWidget {
   const GeneralPage({super.key});
@@ -9,7 +10,7 @@ class GeneralPage extends StatefulWidget {
 
 class _GeneralPageState extends State<GeneralPage> {
   // --- その場で変更するための状態（変数） ---
-  bool _isDarkMode = false;      // ダークモード
+  // _isDarkMode 変数は不要になったので削除しました（AdaptiveThemeが管理するため）
   bool _isVibrationOn = true;    // スキャン時の振動
 
   @override
@@ -23,15 +24,27 @@ class _GeneralPageState extends State<GeneralPage> {
           // 【デザイン設定】
           const _SectionHeader(title: 'デザイン'),
           SwitchListTile(
-            secondary: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode),
+            // 2. 現在のモードがダークかどうかでアイコンを変える
+            secondary: Icon(
+              AdaptiveTheme.of(context).mode.isDark 
+                  ? Icons.dark_mode 
+                  : Icons.light_mode
+            ),
             title: const Text('ダークモード'),
-            subtitle: Text(_isDarkMode ? '背景を暗くします' : '背景を明るくします'),
-            value: _isDarkMode,
+            subtitle: Text(
+              AdaptiveTheme.of(context).mode.isDark ? '背景を暗くします' : '背景を明るくします'
+            ),
+            // 3. 値を AdaptiveTheme から直接取得する
+            value: AdaptiveTheme.of(context).mode.isDark,
             onChanged: (bool value) {
-              // setStateを使うことで、スイッチの見た目がその場で変わります
-              setState(() {
-                _isDarkMode = value;
-              });
+              // 4. スイッチを切り替えた時の処理
+              if (value) {
+                AdaptiveTheme.of(context).setDark(); // ダークモードにする
+              } else {
+                AdaptiveTheme.of(context).setLight(); // ライトモードにする
+              }
+              // 画面を更新
+              setState(() {});
             },
           ),
           const Divider(),
@@ -51,23 +64,19 @@ class _GeneralPageState extends State<GeneralPage> {
           ),
           const Divider(),
 
-          // 【ヘルプ・利用規約】
+          // 【サポート・利用規約（以下略）】
           const _SectionHeader(title: 'サポート'),
           ListTile(
             leading: const Icon(Icons.help_outline),
             title: const Text('ヘルプ'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // ヘルプページへの遷移処理など
-            },
+            onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
             title: const Text('利用規約'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // 利用規約ページへの遷移処理など
-            },
+            onTap: () {},
           ),
         ],
       ),
@@ -75,7 +84,6 @@ class _GeneralPageState extends State<GeneralPage> {
   }
 }
 
-// セクション区切り用の見出しパーツ
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader({required this.title});

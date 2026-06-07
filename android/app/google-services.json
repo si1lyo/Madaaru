@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "854179829182",
+    "project_id": "mada-b82a9",
+    "storage_bucket": "mada-b82a9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854179829182:android:d05b2349196d7ceca7d5ef",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeoOUT8920a_Jz5X-TvBCW3cAnYjmgU0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

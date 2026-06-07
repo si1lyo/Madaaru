@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'generalsetting_page.dart'; // セミコロン忘れがないか確認
+import 'notification_page.dart';
+import 'registered_products_page.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -47,7 +49,8 @@ class SettingPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NotificationPage(), // constを外しました
+                  // 2. notification_page.dart のクラスを呼び出す
+                  builder: (context) => NotificationPage(),
                 ),
               );
             },
@@ -73,7 +76,7 @@ class SettingPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RegisteredProductsPage(), // constを外しました
+                  builder: (context) => const RegisteredProductsPage(),
                 ),
               );
             },
@@ -127,15 +130,7 @@ class AccountPage extends StatelessWidget {
   }
 }
 
-class NotificationPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('通知設定')),
-      body: const Center(child: Text('通知設定のコンテンツ')),
-    );
-  }
-}
+
 
 class ExternalServicePage extends StatelessWidget {
   @override
@@ -147,15 +142,7 @@ class ExternalServicePage extends StatelessWidget {
   }
 }
 
-class RegisteredProductsPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('登録商品')),
-      body: const Center(child: Text('登録商品の一覧')),
-    );
-  }
-}
+
 
 class AnalysisAlgorithmPage extends StatelessWidget {
   @override
