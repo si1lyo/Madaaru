@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'generalsetting_page.dart'; // セミコロン忘れがないか確認
 import 'notification_page.dart';
 import 'registered_products_page.dart';
+import 'account_page.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -36,7 +37,7 @@ class SettingPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AccountPage(), // constを外しました
+                  builder: (context) => const AccountPage()
                 ),
               );
             },
@@ -119,16 +120,6 @@ class SettingPage extends StatelessWidget {
 }
 
 // --- 下に書くクラスからも const を一度外してシンプルにします ---
-
-class AccountPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('アカウント・データ管理')),
-      body: const Center(child: Text('アカウント管理のコンテンツ')),
-    );
-  }
-}
 
 
 

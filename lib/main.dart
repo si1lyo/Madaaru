@@ -3,6 +3,9 @@ import 'package:adaptive_theme/adaptive_theme.dart'; // これが必要
 import 'main_screen.dart';
 import 'package:firebase_core/firebase_core.dart'; // 1. 追加
 import 'firebase_options.dart'; // 2. 追加（自動生成されたファイル）
+import 'auth_page.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +48,20 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: theme,      // builderから渡されたテーマを適用
         darkTheme: darkTheme, // builderから渡されたダークテーマを適用
-        home: const MainScreen(),
+        home: StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(), // ログイン状態を監視
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            // ユーザーデータがあればメイン画面、なければログイン画面を表示
+            if (snapshot.hasData) {
+              return const MainScreen();
+            } else {
+              return const AuthPage();
+            }
+          },
+        ),
       ),
     );
   }
