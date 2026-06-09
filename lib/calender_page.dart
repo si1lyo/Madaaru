@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_application_1/product_kari.dart';
 
 class Event {
   final String title;
@@ -44,21 +45,16 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    
-    _events = [
-      Event(
-        title: 'シャンプー',
-        date: DateTime(2026, 6, 10),
-      ),
-      Event(
-        title: '歯ブラシ',
-         date: DateTime(2026, 6, 15),
-      ),
-      Event(
-        title: '洗剤',
-        date: DateTime(2026, 6, 20),
-      ),
-    ];
+    _events = productData.map((item) {
+      return Event(
+        title: item['name'],
+        date: DateTime.now().add(
+          Duration(
+            days: item['daysLeft'],
+          ),
+        ),
+      );
+    }).toList();
   }
 
   Future<void> loadEvents() async {
