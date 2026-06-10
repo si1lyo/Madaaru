@@ -32,7 +32,7 @@ class SettingPage extends StatelessWidget {
           _buildSettingsItem(
             context,
             icon: Icons.manage_accounts,
-            title: 'アカウント・データ管理',
+            title: 'アカウント・グループ管理',
             onTap: () {
               Navigator.push(
                 context,
