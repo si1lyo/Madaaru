@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_theme.dart';
 import 'generalsetting_page.dart';
-import 'notification_page.dart';
+import 'notificationsetting_page.dart';
 import 'registered_products_page.dart';
 import 'accountsetting_page.dart';
 
