@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'generalsetting_page.dart'; // セミコロン忘れがないか確認
-import 'notification_page.dart';
+import 'notificationsetting_page.dart';
 import 'registered_products_page.dart';
-import 'account_page.dart';
+import 'accountsetting_page.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
