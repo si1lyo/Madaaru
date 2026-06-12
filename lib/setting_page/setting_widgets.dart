@@ -41,14 +41,15 @@ class ThemedSwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppColors.of(context).surface;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04), blurRadius: 4)
+              color: Colors.black.withValues(alpha: 0.08), blurRadius: 4)
         ],
       ),
       child: SwitchListTile(
@@ -83,22 +84,23 @@ class ThemedNavTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = iconColor ?? kDarkGreen;
+    final colors = AppColors.of(context);
+    final color = iconColor ?? colors.accent;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04), blurRadius: 4)
+              color: Colors.black.withValues(alpha: 0.08), blurRadius: 4)
         ],
       ),
       child: ListTile(
         leading: _iconCircle(icon, color: color),
         title: Text(title,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-        trailing: const Icon(Icons.chevron_right, color: kDarkGreen, size: 20),
+        trailing: Icon(Icons.chevron_right, color: colors.accent, size: 20),
         onTap: onTap,
       ),
     );
@@ -114,15 +116,16 @@ class ThemedInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppColors.of(context).surface;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04), blurRadius: 4)
+              color: Colors.black.withValues(alpha: 0.08), blurRadius: 4)
         ],
       ),
       child: Row(
@@ -158,7 +161,7 @@ class ThemedDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: kBg,
+      backgroundColor: AppColors.of(context).bg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text(title,
           style: const TextStyle(

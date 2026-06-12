@@ -33,7 +33,7 @@ class _CameraPageState extends State<CameraPage> {
         orElse: () => cameras.first,
       );
       if (cameras.isNotEmpty) {
-        _controller = CameraController(main, ResolutionPreset.high);
+        _controller = CameraController(main, ResolutionPreset.high, enableAudio: false);
         await _controller!.initialize();
         if (!mounted) return;
         setState(() => _isCameraInitialized = true);

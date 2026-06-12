@@ -179,10 +179,11 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
-      backgroundColor: kBg,
+      backgroundColor: colors.bg,
       appBar: AppBar(
-        backgroundColor: kDarkGreen,
+        backgroundColor: colors.navBg,
         foregroundColor: Colors.white,
         title: const Text('アカウント・グループ管理',
             style: TextStyle(fontWeight: FontWeight.bold)),

@@ -56,7 +56,9 @@ class SettingPage extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold, color: kDarkGreen)),
         centerTitle: true,
       ),
-      body: items.isEmpty
+      body: Builder(builder: (context) {
+        final colors = AppColors.of(context);
+        return items.isEmpty
           ? Center(
               child: Text('「$searchQuery」は見つかりません',
                   style: const TextStyle(color: Colors.grey)))
@@ -68,7 +70,7 @@ class SettingPage extends StatelessWidget {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.92),
+                    color: colors.surface,
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
@@ -83,21 +85,22 @@ class SettingPage extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: kDarkGreen.withValues(alpha: 0.1),
+                        color: colors.accent.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(item.icon, color: kDarkGreen, size: 20),
+                      child: Icon(item.icon, color: colors.accent, size: 20),
                     ),
                     title: Text(item.title,
                         style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w500)),
-                    trailing: const Icon(Icons.chevron_right,
-                        color: kDarkGreen, size: 20),
+                    trailing: Icon(Icons.chevron_right,
+                        color: colors.accent, size: 20),
                     onTap: () => _navigate(context, item.title),
                   ),
                 );
               },
-            ),
+            );
+      }),
     );
   }
 }

@@ -89,14 +89,16 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     final upcoming = _getUpcoming();
 
+    final colors = AppColors.of(context);
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Text('カレンダー',
-            style: TextStyle(fontWeight: FontWeight.bold, color: kDarkGreen)),
+        title: Text('カレンダー',
+            style: TextStyle(fontWeight: FontWeight.bold, color: colors.accent)),
         centerTitle: true,
       ),
       // SingleChildScrollView で全体を包んでオーバーフロー解消
@@ -108,7 +110,7 @@ class _CalendarPageState extends State<CalendarPage> {
             // ── カレンダー ──
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.92),
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -135,24 +137,24 @@ class _CalendarPageState extends State<CalendarPage> {
                 onPageChanged: (focusedDay) {
                   _focusedDay = focusedDay;
                 },
-                headerStyle: const HeaderStyle(
+                headerStyle: HeaderStyle(
                   titleCentered: true,
                   formatButtonVisible: false,
                   titleTextStyle: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: kDarkGreen,
+                    color: colors.accent,
                   ),
                   leftChevronIcon:
-                      Icon(Icons.chevron_left, color: kDarkGreen),
+                      Icon(Icons.chevron_left, color: colors.accent),
                   rightChevronIcon:
-                      Icon(Icons.chevron_right, color: kDarkGreen),
+                      Icon(Icons.chevron_right, color: colors.accent),
                 ),
                 calendarStyle: CalendarStyle(
                   todayDecoration: const BoxDecoration(
                       color: kMint, shape: BoxShape.circle),
-                  selectedDecoration: const BoxDecoration(
-                      color: kDarkGreen, shape: BoxShape.circle),
+                  selectedDecoration: BoxDecoration(
+                      color: colors.accent, shape: BoxShape.circle),
                   todayTextStyle: const TextStyle(color: Colors.white),
                   selectedTextStyle: const TextStyle(color: Colors.white),
                   weekendTextStyle: TextStyle(color: Colors.red[300]),
@@ -183,11 +185,11 @@ class _CalendarPageState extends State<CalendarPage> {
             // ── セクションヘッダ ──
             Row(
               children: [
-                const Text('直近の賞味期限',
+                Text('直近の賞味期限',
                     style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: kDarkGreen)),
+                        color: colors.accent)),
                 if (widget.searchQuery.isNotEmpty) ...[
                   const SizedBox(width: 8),
                   Expanded(
@@ -229,11 +231,11 @@ class _CalendarPageState extends State<CalendarPage> {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.92),
+                      color: colors.surface,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                         ),
                       ],

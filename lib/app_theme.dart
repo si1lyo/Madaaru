@@ -5,6 +5,49 @@ const kMint = Color(0xFF89D7B7);
 const kBg = Color(0xFFFFFDFB);
 const kFont = 'NotoSansJP';
 
+// ── ダークモード用カラー ───────────────────────────────────────
+const kBgDark = Color(0xFF1B1D1C);        // ほぼ黒・わずかに温かみ
+const kSurfaceDark = Color(0xFF262928);   // ダークチャコール（青みなし）
+const kAccentDark = Color(0xFF5EA896);    // 落ち着いたティール
+const kNavBgDark = Color(0xFF2B4540);     // ブランドティール感を残したナビ
+const kCookieBgDark = Color(0xFF283C38); // 控えめなダーククッキー
+
+// ── テーマ対応カラーセット ─────────────────────────────────────
+class AppColors {
+  final Color bg;
+  final Color surface;
+  final Color accent;
+  final Color navBg;
+  final Color cookieBg;
+
+  const AppColors._({
+    required this.bg,
+    required this.surface,
+    required this.accent,
+    required this.navBg,
+    required this.cookieBg,
+  });
+
+  static AppColors of(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? _dark : _light;
+
+  static const _light = AppColors._(
+    bg: kBg,
+    surface: Color(0xFFFFFFFF),
+    accent: kDarkGreen,
+    navBg: kDarkGreen,
+    cookieBg: kDarkGreen,
+  );
+
+  static const _dark = AppColors._(
+    bg: kBgDark,
+    surface: kSurfaceDark,
+    accent: kAccentDark,
+    navBg: kNavBgDark,
+    cookieBg: kCookieBgDark,
+  );
+}
+
 // ── クッキー形状クリッパー ──────────────────────────────────────
 class CookieClipper extends CustomClipper<Path> {
   final int points;
