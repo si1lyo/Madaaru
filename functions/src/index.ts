@@ -9,6 +9,7 @@ interface ReceiptItem {
   price: number;
   quantity?: number;
   genre: string;
+  estimatedDays: number;
 }
 
 interface ReceiptData {
@@ -47,8 +48,8 @@ export const analyzeReceipt = onCall(
     });
 
     const response = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 2048,
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 1024,
       messages: [
         {
           role: "user",
@@ -75,7 +76,8 @@ export const analyzeReceipt = onCall(
       "name": "商品名",
       "price": 価格の数値,
       "quantity": 数量の数値（不明な場合は1）,
-      "genre": "食品・日用品・その他のいずれか"
+      "genre": "食品・日用品・その他のいずれか",
+      "estimatedDays": 購入から使い切るまでの推定日数（整数）
     }
   ]
 }
@@ -85,7 +87,8 @@ export const analyzeReceipt = onCall(
 - 日付が読み取れない場合は null
 - 商品名は日本語のまま
 - itemsは必ず配列（空でも可）
-- genreは必ず「食品」「日用品」「その他」のいずれかにすること`,
+- genreは必ず「食品」「日用品」「その他」のいずれかにすること
+- estimatedDaysは商品名・種別・容量から判断した一般的な消費日数の目安（例：牛乳200ml→3日、シャンプー400ml→45日、ティッシュ5箱→60日）。必ず1以上の整数`,
             },
           ],
         },

@@ -52,8 +52,8 @@ class SettingPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Text('設定',
-            style: TextStyle(fontWeight: FontWeight.bold, color: kDarkGreen)),
+        title: Text('設定',
+            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.of(context).accent)),
         centerTitle: true,
       ),
       body: Builder(builder: (context) {
@@ -114,22 +114,30 @@ class _SettingItem {
 // ── サブページ ────────────────────────────────────────────────
 class ExternalServicePage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-            title: const Text('外部サービスの連携'),
-            backgroundColor: kDarkGreen,
-            foregroundColor: Colors.white),
-        body: const Center(child: Text('外部連携のコンテンツ')),
-      );
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return Scaffold(
+      backgroundColor: colors.bg,
+      appBar: AppBar(
+          title: const Text('外部サービスの連携'),
+          backgroundColor: colors.navBg,
+          foregroundColor: Colors.white),
+      body: const Center(child: Text('外部連携のコンテンツ')),
+    );
+  }
 }
 
 class AnalysisAlgorithmPage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-            title: const Text('分析アルゴリズム'),
-            backgroundColor: kDarkGreen,
-            foregroundColor: Colors.white),
-        body: const Center(child: Text('アルゴリズム設定のコンテンツ')),
-      );
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return Scaffold(
+      backgroundColor: colors.bg,
+      appBar: AppBar(
+          title: const Text('分析アルゴリズム'),
+          backgroundColor: colors.navBg,
+          foregroundColor: Colors.white),
+      body: const Center(child: Text('アルゴリズム設定のコンテンツ')),
+    );
+  }
 }

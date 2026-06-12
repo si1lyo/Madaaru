@@ -12,8 +12,8 @@ class SettingSectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8, bottom: 6, left: 4),
       child: Text(
         title,
-        style: const TextStyle(
-          color: kDarkGreen,
+        style: TextStyle(
+          color: AppColors.of(context).accent,
           fontWeight: FontWeight.bold,
           fontSize: 13,
         ),
@@ -164,8 +164,8 @@ class ThemedDialog extends StatelessWidget {
       backgroundColor: AppColors.of(context).bg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text(title,
-          style: const TextStyle(
-              color: kDarkGreen, fontWeight: FontWeight.bold)),
+          style: TextStyle(
+              color: AppColors.of(context).accent, fontWeight: FontWeight.bold)),
       content: Column(mainAxisSize: MainAxisSize.min, children: fields),
       actions: [
         TextButton(

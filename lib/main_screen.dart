@@ -6,6 +6,7 @@ import 'home_page.dart';
 import 'calender_page.dart';
 import 'camera_page.dart';
 import 'setting_page/setting_page.dart';
+import 'widgets/icon_picker.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -15,7 +16,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1;
+  int _currentIndex = 0;
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -37,6 +38,7 @@ class _MainScreenState extends State<MainScreen> {
     final nameController = TextEditingController();
     final typeController = TextEditingController();
     String selectedGenre = '食品';
+    String selectedIcon = '';
     bool saveToGroup = false;
 
     final colors = AppColors.of(context);
@@ -63,10 +65,48 @@ class _MainScreenState extends State<MainScreen> {
                       fontWeight: FontWeight.bold,
                       color: colors.accent)),
               const SizedBox(height: 20),
-              TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                      labelText: '商品名', hintText: '例：明治おいしい牛乳')),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showIconPicker(context,
+                          current: selectedIcon);
+                      if (picked != null) {
+                        setSheetState(() => selectedIcon = picked);
+                      }
+                    },
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: colors.accent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: colors.accent.withValues(alpha: 0.3)),
+                      ),
+                      child: Center(
+                        child: selectedIcon.isNotEmpty
+                            ? Icon(
+                                IconData(int.parse(selectedIcon),
+                                    fontFamily: 'MaterialIcons'),
+                                color: colors.accent,
+                                size: 26,
+                              )
+                            : Icon(Icons.add_photo_alternate_outlined,
+                                color: colors.accent),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                            labelText: '商品名',
+                            hintText: '例：明治おいしい牛乳')),
+                  ),
+                ],
+              ),
               TextField(
                   controller: typeController,
                   decoration:
@@ -137,6 +177,7 @@ class _MainScreenState extends State<MainScreen> {
                       'name': nameController.text.trim(),
                       'type': typeController.text.trim(),
                       'genre': selectedGenre,
+                      'icon': selectedIcon,
                       'purchaseDate': Timestamp.now(),
                       'registeredBy': user.displayName ?? user.email,
                     });
@@ -293,7 +334,7 @@ class _BottomNavBar extends StatelessWidget {
   const _BottomNavBar({required this.currentIndex, required this.onTap});
 
   static const _items = [
-    (icon: Icons.calendar_month_outlined, label: 'カレンダー'),
+    (icon: Icons.analytics_outlined, label: '分析'),
     (icon: Icons.list_alt_outlined, label: 'リスト'),
     (icon: Icons.settings_outlined, label: '設定'),
   ];

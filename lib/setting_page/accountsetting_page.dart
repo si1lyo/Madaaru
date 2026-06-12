@@ -243,7 +243,7 @@ class _AccountPageState extends State<AccountPage> {
               const SettingSectionHeader(title: 'アカウント'),
               ThemedNavTile(
                 icon: Icons.logout,
-                iconColor: Colors.orange,
+                iconColor: Colors.red,
                 title: 'ログアウト',
                 onTap: () async {
                   final nav = Navigator.of(context);

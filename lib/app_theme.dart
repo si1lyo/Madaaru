@@ -79,16 +79,20 @@ class AppBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final colors = AppColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cookieColor1 = isDark ? const Color(0xFF2E4A44) : kMint;
+    final cookieColor2 = isDark ? kNavBgDark : kDarkGreen;
     return Stack(
       children: [
-        const ColoredBox(color: kBg, child: SizedBox.expand()),
+        ColoredBox(color: colors.bg, child: const SizedBox.expand()),
         ClipPath(
           clipper: CookieClipper(
             points: 6,
             size: size.width * 1.0,
             offset: Offset(-size.width * 0.35, -size.height * 0.15),
           ),
-          child: const ColoredBox(color: kMint, child: SizedBox.expand()),
+          child: ColoredBox(color: cookieColor1, child: const SizedBox.expand()),
         ),
         ClipPath(
           clipper: CookieClipper(
@@ -96,7 +100,7 @@ class AppBackground extends StatelessWidget {
             size: size.width * 1.2,
             offset: Offset(size.width * 0.38, size.height * 0.55),
           ),
-          child: const ColoredBox(color: kDarkGreen, child: SizedBox.expand()),
+          child: ColoredBox(color: cookieColor2, child: const SizedBox.expand()),
         ),
         child,
       ],
