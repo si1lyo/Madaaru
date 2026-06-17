@@ -34,6 +34,7 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
+  // --- 商品詳細登録シート ---
   void _showAddProductSheet() {
     final nameController = TextEditingController();
     final typeController = TextEditingController();
@@ -53,7 +54,9 @@ class _MainScreenState extends State<MainScreen> {
         builder: (context, setSheetState) => Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
-            top: 20, left: 20, right: 20,
+            top: 20,
+            left: 20,
+            right: 20,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -102,8 +105,7 @@ class _MainScreenState extends State<MainScreen> {
                     child: TextField(
                         controller: nameController,
                         decoration: const InputDecoration(
-                            labelText: '商品名',
-                            hintText: '例：明治おいしい牛乳')),
+                            labelText: '商品名', hintText: '例：明治おいしい牛乳')),
                   ),
                 ],
               ),
@@ -119,8 +121,7 @@ class _MainScreenState extends State<MainScreen> {
                 items: ['食品', '日用品', 'その他']
                     .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                     .toList(),
-                onChanged: (val) =>
-                    setSheetState(() => selectedGenre = val!),
+                onChanged: (val) => setSheetState(() => selectedGenre = val!),
               ),
               const SizedBox(height: 10),
               SwitchListTile(
@@ -142,19 +143,51 @@ class _MainScreenState extends State<MainScreen> {
                   onPressed: () async {
                     final user = FirebaseAuth.instance.currentUser;
                     if (user == null) return;
+
+                    // 1. 商品名の入力チェック (エラーメッセージ)
                     if (nameController.text.trim().isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('商品名を入力してください')));
+                        const SnackBar(
+                          content: Text('商品の名前が登録されていません'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                       return;
                     }
+
+                    // 2. 物の項目の入力チェック (確認ダイアログ)
+                    if (typeController.text.trim().isEmpty) {
+                      final bool? proceed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('確認'),
+                          content: const Text('物の項目に何も入力がありませんが大丈夫ですか？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('はい'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('いいえ'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (proceed != true) return; // 「いいえ」または閉じた場合は中止
+                    }
+
+                    // --- 保存処理開始 ---
                     final userDoc = await FirebaseFirestore.instance
                         .collection('users')
                         .doc(user.uid)
                         .get();
                     final String? groupId =
                         userDoc.data()?['groupId'] as String?;
-                    if (saveToGroup &&
-                        (groupId == null || groupId.isEmpty)) {
+
+                    // グループ未所属での共有チェック
+                    if (saveToGroup && (groupId == null || groupId.isEmpty)) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -164,6 +197,7 @@ class _MainScreenState extends State<MainScreen> {
                       }
                       return;
                     }
+
                     final target = saveToGroup && groupId != null
                         ? FirebaseFirestore.instance
                             .collection('groups')
@@ -173,6 +207,7 @@ class _MainScreenState extends State<MainScreen> {
                             .collection('users')
                             .doc(user.uid)
                             .collection('my_products');
+
                     await target.add({
                       'name': nameController.text.trim(),
                       'type': typeController.text.trim(),
@@ -180,16 +215,16 @@ class _MainScreenState extends State<MainScreen> {
                       'icon': selectedIcon,
                       'purchaseDate': Timestamp.now(),
                       'registeredBy': user.displayName ?? user.email,
+                      'cycle': 0, // 初期値
                     });
+
                     if (context.mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content:
-                              Text('${nameController.text} を追加しました')));
+                          content: Text('${nameController.text} を追加しました')));
                     }
                   },
-                  child: const Text('リストに追加',
-                      style: TextStyle(fontSize: 16)),
+                  child: const Text('リストに追加', style: TextStyle(fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 20),
@@ -216,17 +251,17 @@ class _MainScreenState extends State<MainScreen> {
       backgroundColor: colors.bg,
       body: Stack(
         children: [
-          // ── 右下 cookie ──
+          // 右下 cookie デザイン
           ClipPath(
             clipper: CookieClipper(
               points: 9,
               size: size.width * 1.2,
               offset: Offset(size.width * 0.38, size.height * 0.55),
             ),
-            child: ColoredBox(color: colors.cookieBg, child: const SizedBox.expand()),
+            child:
+                ColoredBox(color: colors.cookieBg, child: const SizedBox.expand()),
           ),
 
-          // ── ページ + ボトムナビ（縦に確定） ──
           SafeArea(
             bottom: false,
             child: Column(
@@ -240,7 +275,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
 
-          // ── 検索 + FAB（ページの上に浮遊、リストは下を流れる） ──
+          // 検索 + FABレイヤー
           Positioned(
             left: 16,
             right: 16,
@@ -278,13 +313,11 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-// ナビバーの高さ（SafeArea下部 + padding + items行）を返す
 double _navBarHeight(BuildContext context) {
   final bottomPadding = MediaQuery.of(context).padding.bottom;
-  return bottomPadding + 52 + 20 + 8; // SafeArea + items + padding上下 + margin
+  return bottomPadding + 52 + 20 + 8;
 }
 
-// ── 検索カプセル（ボトムナビとは別レイヤー） ──────────────────
 class _SearchCapsule extends StatelessWidget {
   final TextEditingController controller;
   const _SearchCapsule({required this.controller});
@@ -311,7 +344,8 @@ class _SearchCapsule extends StatelessWidget {
         cursorColor: colors.accent,
         decoration: InputDecoration(
           hintText: '商品を検索',
-          hintStyle: TextStyle(color: colors.accent.withValues(alpha: 0.5), fontSize: 15),
+          hintStyle: TextStyle(
+              color: colors.accent.withValues(alpha: 0.5), fontSize: 15),
           suffixIcon: controller.text.isNotEmpty
               ? IconButton(
                   icon: Icon(Icons.close, color: colors.accent, size: 20),
@@ -327,7 +361,6 @@ class _SearchCapsule extends StatelessWidget {
   }
 }
 
-// ── ボトムナビバー（ナビのみ、ダークティール背景） ────────────
 class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;

@@ -306,7 +306,7 @@ class _ReceiptConfirmPageState extends State<ReceiptConfirmPage> {
         color: colors.bg,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withOpacity(0.06), // withValuesから修正（古いバージョン対応）
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -441,7 +441,6 @@ class _ItemCard extends StatelessWidget {
                 children: [
                   TextField(
                     controller: item.nameController,
-                    maxLength: 100,
                     style: const TextStyle(
                         fontFamily: kFont,
                         fontWeight: FontWeight.bold,
@@ -450,8 +449,6 @@ class _ItemCard extends StatelessWidget {
                       labelText: '商品名',
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(vertical: 6),
-                      border: UnderlineInputBorder(),
-                      counterText: '',
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -492,7 +489,7 @@ class _ItemCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    initialValue: item.genre,
+                    value: item.genre, // initialValueよりvalueの方が状態管理に適しています
                     isDense: true,
                     decoration: const InputDecoration(
                       labelText: 'ジャンル',

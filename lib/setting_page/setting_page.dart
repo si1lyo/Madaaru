@@ -4,6 +4,7 @@ import 'generalsetting_page.dart';
 import 'notificationsetting_page.dart';
 import 'registered_products_page.dart';
 import 'accountsetting_page.dart';
+import 'analysis_algorithm_page.dart'; // 既存のimportエリアに追加
 
 class SettingPage extends StatelessWidget {
   final String searchQuery;
@@ -15,7 +16,7 @@ class SettingPage extends StatelessWidget {
     _SettingItem(icon: Icons.notifications, title: '通知設定'),
     _SettingItem(icon: Icons.link, title: '外部サービスの連携'),
     _SettingItem(icon: Icons.inventory_2, title: '登録商品'),
-    _SettingItem(icon: Icons.analytics, title: '購入周期分析アルゴリズム'),
+    _SettingItem(icon: Icons.analytics, title: '購入周期設定'),
   ];
 
   void _navigate(BuildContext context, String title) {
@@ -127,17 +128,3 @@ class ExternalServicePage extends StatelessWidget {
   }
 }
 
-class AnalysisAlgorithmPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    return Scaffold(
-      backgroundColor: colors.bg,
-      appBar: AppBar(
-          title: const Text('分析アルゴリズム'),
-          backgroundColor: colors.navBg,
-          foregroundColor: Colors.white),
-      body: const Center(child: Text('アルゴリズム設定のコンテンツ')),
-    );
-  }
-}
