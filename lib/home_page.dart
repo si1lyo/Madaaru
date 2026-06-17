@@ -37,11 +37,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     final userDoc = await FirebaseFirestore.instance
-        .collection('users').doc(user.uid).get();
+        .collection('users')
+        .doc(user.uid)
+        .get();
     final gid = userDoc.data()?['groupId'] as String?;
     if (gid != null && gid.isNotEmpty) {
       final groupDoc = await FirebaseFirestore.instance
-          .collection('groups').doc(gid).get();
+          .collection('groups')
+          .doc(gid)
+          .get();
       if (mounted) {
         setState(() {
           _groupId = gid;
@@ -65,22 +69,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 8),
-          child: Icon(Icons.menu, color: kDarkGreen),
-        ),
         title: _buildTitleToggle(),
         centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: kDarkGreen,
-              child: const Icon(Icons.person, color: Colors.white, size: 20),
-            ),
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: _buildCategoryBar(),
@@ -103,8 +93,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   activeColor: activeColor,
                 )
               : const Center(
-                  child: Text('グループに所属していません',
-                      style: TextStyle(color: Colors.grey))),
+                  child: Text(
+                    'グループに所属していません',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
         ],
       ),
     );
@@ -122,11 +115,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _toggleItem('マイリスト', !isGroup,
-              () => _mainTabController.animateTo(0)),
+          _toggleItem('マイリスト', !isGroup, () => _mainTabController.animateTo(0)),
           if (_groupName != null)
-            _toggleItem(_groupName!, isGroup,
-                () => _mainTabController.animateTo(1)),
+            _toggleItem(
+              _groupName!,
+              isGroup,
+              () => _mainTabController.animateTo(1),
+            ),
         ],
       ),
     );
@@ -137,17 +132,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected ? activeColor : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(text,
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Colors.grey[600])),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.white : Colors.grey[600],
+          ),
+        ),
       ),
     );
   }
@@ -160,17 +157,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: List.generate(_categories.length, (index) {
           final isSelected = _selectedCategoryIndex == index;
           return InkWell(
-            onTap: () =>
-                setState(() => _selectedCategoryIndex = index),
+            onTap: () => setState(() => _selectedCategoryIndex = index),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  vertical: 12, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: isSelected
-                        ? activeColor
-                        : Colors.transparent,
+                    color: isSelected ? activeColor : Colors.transparent,
                     width: 2.5,
                   ),
                 ),
@@ -178,12 +171,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Text(
                 _categories[index],
                 style: TextStyle(
-                  color: isSelected
-                      ? activeColor
-                      : Colors.grey[600],
-                  fontWeight: isSelected
-                      ? FontWeight.bold
-                      : FontWeight.normal,
+                  color: isSelected ? activeColor : Colors.grey[600],
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   fontSize: 14,
                 ),
               ),
@@ -222,7 +211,8 @@ class _MyList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: kDarkGreen));
+            child: CircularProgressIndicator(color: kDarkGreen),
+          );
         }
 
         var docs = snapshot.data?.docs ?? [];
@@ -245,9 +235,7 @@ class _MyList extends StatelessWidget {
         if (docs.isEmpty) {
           return Center(
             child: Text(
-              searchQuery.isNotEmpty
-                  ? '「$searchQuery」は見つかりません'
-                  : '商品がありません',
+              searchQuery.isNotEmpty ? '「$searchQuery」は見つかりません' : '商品がありません',
               style: const TextStyle(color: Colors.grey),
             ),
           );
@@ -263,8 +251,7 @@ class _MyList extends StatelessWidget {
               name: data['name'] ?? '',
               genre: data['genre'] ?? '',
               price: (data['price'] as num?)?.toDouble() ?? 0,
-              purchaseDate:
-                  (data['purchaseDate'] as Timestamp?)?.toDate(),
+              purchaseDate: (data['purchaseDate'] as Timestamp?)?.toDate(),
               icon: data['icon'] as String? ?? '',
               activeColor: activeColor,
               isGroup: false,
@@ -302,7 +289,8 @@ class _GroupList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: kDarkGreen));
+            child: CircularProgressIndicator(color: kDarkGreen),
+          );
         }
 
         var docs = snapshot.data?.docs ?? [];
@@ -343,8 +331,7 @@ class _GroupList extends StatelessWidget {
               name: data['name'] ?? '',
               genre: data['genre'] ?? '',
               price: (data['price'] as num?)?.toDouble() ?? 0,
-              purchaseDate:
-                  (data['purchaseDate'] as Timestamp?)?.toDate(),
+              purchaseDate: (data['purchaseDate'] as Timestamp?)?.toDate(),
               icon: data['icon'] as String? ?? '',
               activeColor: activeColor,
               isGroup: true,
@@ -428,8 +415,11 @@ class _ProductCard extends StatelessWidget {
                       size: 22,
                     );
                   }
-                  return Icon(Icons.inventory_2_outlined,
-                      color: activeColor, size: 22);
+                  return Icon(
+                    Icons.inventory_2_outlined,
+                    color: activeColor,
+                    size: 22,
+                  );
                 }(),
               ),
             ),
@@ -438,44 +428,52 @@ class _ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name,
-                      style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600)),
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Row(
                     children: [
                       if (genre.isNotEmpty)
-                        Text(genre,
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[500])),
+                        Text(
+                          genre,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                          ),
+                        ),
                       if (genre.isNotEmpty && price > 0)
-                        Text('  ·  ',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[400])),
+                        Text(
+                          '  ·  ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[400],
+                          ),
+                        ),
                       if (price > 0)
                         Text(
                           '¥${NumberFormat('#,###').format(price.toInt())}',
                           style: TextStyle(
-                              fontSize: 12,
-                              color: activeColor,
-                              fontWeight: FontWeight.w500),
+                            fontSize: 12,
+                            color: activeColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                     ],
                   ),
                   if (purchaseDate != null)
                     Text(
                       _daysAgoText(purchaseDate!),
-                      style: TextStyle(
-                          fontSize: 11, color: Colors.grey[400]),
+                      style: TextStyle(fontSize: 11, color: Colors.grey[400]),
                     ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right,
-                color: Colors.grey[300], size: 20),
+            Icon(Icons.chevron_right, color: Colors.grey[300], size: 20),
           ],
         ),
       ),

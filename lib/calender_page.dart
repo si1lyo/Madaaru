@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart';
 import 'analysis_tabs/calendar_tab.dart';
 import 'analysis_tabs/spending_tab.dart';
-import 'analysis_tabs/prediction_tab.dart';
-import 'analysis_tabs/history_tab.dart';
 
 class CalendarPage extends StatefulWidget {
   final String searchQuery;
@@ -16,7 +14,7 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   int _selectedIndex = 0;
 
-  static const _tabs = ['カレンダー', '支出', '予測', '購入履歴'];
+  static const _tabs = ['カレンダー', '支出'];
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +42,9 @@ class _CalendarPageState extends State<CalendarPage> {
                   onTap: () => setState(() => _selectedIndex = index),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 8),
+                      vertical: 12,
+                      horizontal: 8,
+                    ),
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
@@ -58,9 +58,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     child: Text(
                       _tabs[index],
                       style: TextStyle(
-                        color: isSelected
-                            ? colors.accent
-                            : Colors.grey[600],
+                        color: isSelected ? colors.accent : Colors.grey[600],
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -79,8 +77,6 @@ class _CalendarPageState extends State<CalendarPage> {
         children: [
           CalendarTab(searchQuery: widget.searchQuery),
           const SpendingTab(),
-          const PredictionTab(),
-          const HistoryTab(),
         ],
       ),
     );
