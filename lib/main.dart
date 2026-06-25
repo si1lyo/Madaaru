@@ -7,6 +7,7 @@ import 'firebase_options.dart';
 import 'auth_page.dart';
 import 'onboarding_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'services/notification_service.dart';
 
 
 void main() async {
@@ -15,6 +16,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await NotificationService().initialize();
+
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   final prefs = await SharedPreferences.getInstance();

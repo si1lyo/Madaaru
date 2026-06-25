@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'app_theme.dart';
 import 'main_screen.dart';
+import 'services/notification_service.dart';
 
 const _kDarkGreen = Color(0xFF428475);
 const _kLightGreen = Color(0xFF89D7B7);
@@ -31,15 +32,18 @@ class _AuthPageState extends State<AuthPage> {
     _passwordCtrl.dispose();
     super.dispose();
   }
-
   void _goToMain() {
     if (!mounted) return;
+    NotificationService().showInstantNotification(
+      title: 'こんにちは 👋',
+      body: 'まだある？へようこそ！',
+    );
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const MainScreen()),
       (_) => false,
     );
   }
-
+  
   Future<void> _signInWithGoogle() async {
     setState(() => _loading = true);
     try {
@@ -52,17 +56,19 @@ class _AuthPageState extends State<AuthPage> {
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
-      );
-      await FirebaseAuth.instance.signInWithCredential(credential);
-      _goToMain();
-    } on FirebaseAuthException catch (e) {
-      _showError('Googleログインに失敗しました（${e.code}）');
-    } catch (_) {
-      _showError('Googleログインに失敗しました。');
-    } finally {
+    );
+    await FirebaseAuth.instance.signInWithCredential(credential);
+    _goToMain();
+  } on FirebaseAuthException catch (e) {
+    _showError('Googleログインに失敗しました（${e.code}）');
+  } catch (e) {
+    debugPrint('Google sign-in error: $e');
+    _showError('Googleログインに失敗しました。');
+  } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
+  
 
   Future<void> _authenticate() async {
     if (!_isLogin && _nameCtrl.text.trim().isEmpty) {
