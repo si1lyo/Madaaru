@@ -164,12 +164,12 @@ class _MainScreenState extends State<MainScreen> {
                           content: const Text('物の項目に何も入力がありませんが大丈夫ですか？'),
                           actions: [
                             TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('はい'),
-                            ),
-                            TextButton(
                               onPressed: () => Navigator.pop(context, false),
                               child: const Text('いいえ'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('はい'),
                             ),
                           ],
                         ),
@@ -215,7 +215,8 @@ class _MainScreenState extends State<MainScreen> {
                       'icon': selectedIcon,
                       'purchaseDate': Timestamp.now(),
                       'registeredBy': user.displayName ?? user.email,
-                      'cycle': 0, // 初期値
+                      'cycle': 0, 
+                      'isOut': false, // ★ 消費機能のために必要
                     });
 
                     if (context.mounted) {

@@ -67,6 +67,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         scrolledUnderElevation: 0,
         title: _buildTitleToggle(),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history_rounded, color: kDarkGreen),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RecentlyConsumedPage(
+                    isGroup: _mainTabController.index == 1,
+                    groupId: _groupId,
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: _buildCategoryBar(),
@@ -180,17 +197,98 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 }
 
+// ── 履歴ページ ──────────────────────────────────────────────
+class RecentlyConsumedPage extends StatelessWidget {
+  final bool isGroup;
+  final String? groupId;
+
+  const RecentlyConsumedPage({super.key, required this.isGroup, this.groupId});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const SizedBox.shrink();
+
+    // 住所の決定
+    final CollectionReference collection = isGroup
+        ? FirebaseFirestore.instance.collection('groups').doc(groupId).collection('group_products')
+        : FirebaseFirestore.instance.collection('users').doc(user.uid).collection('my_products');
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isGroup ? 'グループの消費履歴' : '個人の消費履歴', 
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: Colors.white,
+        foregroundColor: kDarkGreen,
+        elevation: 0,
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        // ★ シンプルに「isOutがtrueのもの」だけを持ってくる（並び替えはここではしない）
+        stream: collection.where('isOut', isEqualTo: true).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) return Center(child: Text('エラーが発生しました\n${snapshot.error}'));
+          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+
+          var docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(child: Text('最近消費した商品はありません', style: TextStyle(color: Colors.grey)));
+          }
+
+          // ★ アプリ側で日付順に並び替える（データが壊れていてもエラーにならない工夫）
+          final sortedDocs = List.from(docs);
+          sortedDocs.sort((a, b) {
+            final aData = a.data() as Map<String, dynamic>;
+            final bData = b.data() as Map<String, dynamic>;
+            final Timestamp? aTime = aData['outDate'] ?? aData['purchaseDate']; // outDateがなければ購入日で代用
+            final Timestamp? bTime = bData['outDate'] ?? bData['purchaseDate'];
+            if (aTime == null || bTime == null) return 0;
+            return bTime.compareTo(aTime); // 新しい順
+          });
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: sortedDocs.length,
+            itemBuilder: (context, index) {
+              final doc = sortedDocs[index];
+              final data = doc.data() as Map<String, dynamic>;
+              final date = (data['outDate'] as Timestamp?)?.toDate();
+              
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  leading: const Icon(Icons.history_toggle_off, color: Colors.orange),
+                  title: Text(data['name'] ?? '名前なし', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(date != null 
+                    ? '${DateFormat('MM/dd HH:mm').format(date)} に消費' 
+                    : '消費日の記録なし'),
+                  trailing: TextButton(
+                    onPressed: () async {
+                      // 「在庫あり」に戻す処理
+                      await doc.reference.update({
+                        'isOut': false, 
+                        'outDate': FieldValue.delete()
+                      });
+                    },
+                    child: const Text('戻す'),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
 // ── マイリスト ──────────────────────────────────────────────────
 class _MyList extends StatelessWidget {
   final String searchQuery;
   final String selectedCategory;
   final Color activeColor;
 
-  const _MyList({
-    required this.searchQuery,
-    required this.selectedCategory,
-    required this.activeColor,
-  });
+  const _MyList({required this.searchQuery, required this.selectedCategory, required this.activeColor});
 
   @override
   Widget build(BuildContext context) {
@@ -199,34 +297,29 @@ class _MyList extends StatelessWidget {
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('my_products')
+          .collection('users').doc(user.uid).collection('my_products')
           .orderBy('purchaseDate', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(color: kDarkGreen),
-          );
-        }
+        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
 
         var docs = snapshot.data?.docs ?? [];
 
-        // 検索とカテゴリでフィルタリング
+        // 在庫あり（isOutがtrueでないもの）のみを抽出
+        // ※ 複合インデックスエラーを避けるため、一旦アプリ側でフィルタリングします
+        docs = docs.where((doc) {
+          final d = doc.data() as Map<String, dynamic>;
+          return d['isOut'] != true;
+        }).toList();
+
         if (searchQuery.isNotEmpty) {
-          docs = docs.where((doc) {
-            final name = ((doc.data() as Map)['name'] ?? '').toString().toLowerCase();
-            return name.contains(searchQuery.toLowerCase());
-          }).toList();
+          docs = docs.where((doc) => (doc['name'] ?? '').toString().toLowerCase().contains(searchQuery.toLowerCase())).toList();
         }
         if (selectedCategory != 'すべて') {
-          docs = docs.where((doc) => (doc.data() as Map)['genre'] == selectedCategory).toList();
+          docs = docs.where((doc) => doc['genre'] == selectedCategory).toList();
         }
 
-        if (docs.isEmpty) {
-          return const Center(child: Text('商品がありません', style: TextStyle(color: Colors.grey)));
-        }
+        if (docs.isEmpty) return const Center(child: Text('商品がありません', style: TextStyle(color: Colors.grey)));
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
@@ -240,7 +333,7 @@ class _MyList extends StatelessWidget {
               price: (data['price'] as num?)?.toDouble() ?? 0,
               purchaseDate: (data['purchaseDate'] as Timestamp?)?.toDate(),
               icon: data['icon'] as String? ?? '',
-              isOut: data['isOut'] as bool? ?? false, // 在庫なしフラグを取得
+              isOut: false,
               activeColor: activeColor,
               isGroup: false,
             );
@@ -258,42 +351,29 @@ class _GroupList extends StatelessWidget {
   final String selectedCategory;
   final Color activeColor;
 
-  const _GroupList({
-    required this.groupId,
-    required this.searchQuery,
-    required this.selectedCategory,
-    required this.activeColor,
-  });
+  const _GroupList({required this.groupId, required this.searchQuery, required this.selectedCategory, required this.activeColor});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('groups')
-          .doc(groupId)
-          .collection('group_products')
+          .collection('groups').doc(groupId).collection('group_products')
           .orderBy('purchaseDate', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: kDarkGreen));
-        }
+        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
 
         var docs = snapshot.data?.docs ?? [];
+        docs = docs.where((doc) => (doc.data() as Map<String, dynamic>)['isOut'] != true).toList();
 
         if (searchQuery.isNotEmpty) {
-          docs = docs.where((doc) {
-            final name = ((doc.data() as Map)['name'] ?? '').toString().toLowerCase();
-            return name.contains(searchQuery.toLowerCase());
-          }).toList();
+          docs = docs.where((doc) => (doc['name'] ?? '').toString().toLowerCase().contains(searchQuery.toLowerCase())).toList();
         }
         if (selectedCategory != 'すべて') {
-          docs = docs.where((doc) => (doc.data() as Map)['genre'] == selectedCategory).toList();
+          docs = docs.where((doc) => doc['genre'] == selectedCategory).toList();
         }
 
-        if (docs.isEmpty) {
-          return const Center(child: Text('グループに商品がありません', style: TextStyle(color: Colors.grey)));
-        }
+        if (docs.isEmpty) return const Center(child: Text('グループに商品がありません', style: TextStyle(color: Colors.grey)));
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
@@ -307,7 +387,7 @@ class _GroupList extends StatelessWidget {
               price: (data['price'] as num?)?.toDouble() ?? 0,
               purchaseDate: (data['purchaseDate'] as Timestamp?)?.toDate(),
               icon: data['icon'] as String? ?? '',
-              isOut: data['isOut'] as bool? ?? false, // 在庫なしフラグ
+              isOut: false,
               activeColor: activeColor,
               isGroup: true,
               groupId: groupId,
@@ -327,214 +407,75 @@ class _ProductCard extends StatelessWidget {
   final double price;
   final DateTime? purchaseDate;
   final String icon;
-  final bool isOut; // 在庫切れフラグ
+  final bool isOut; 
   final Color activeColor;
   final bool isGroup;
   final String? groupId;
 
-  const _ProductCard({
-    required this.docId,
-    required this.name,
-    required this.genre,
-    this.price = 0,
-    this.purchaseDate,
-    this.icon = '',
-    required this.isOut,
-    required this.activeColor,
-    required this.isGroup,
-    this.groupId,
-  });
+  const _ProductCard({required this.docId, required this.name, required this.genre, this.price = 0, this.purchaseDate, this.icon = '', required this.isOut, required this.activeColor, required this.isGroup, this.groupId});
 
-  // Firestoreの参照（住所）を取得するヘルパー
   DocumentReference get _docRef {
     return isGroup
-        ? FirebaseFirestore.instance
-            .collection('groups')
-            .doc(groupId)
-            .collection('group_products')
-            .doc(docId)
-        : FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .collection('my_products')
-            .doc(docId);
+        ? FirebaseFirestore.instance.collection('groups').doc(groupId).collection('group_products').doc(docId)
+        : FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).collection('my_products').doc(docId);
   }
 
-  // 「消費（在庫なし）」にする処理
   Future<void> _markAsOut(BuildContext context) async {
     try {
-      await _docRef.update({
-        'isOut': true,
-        'outDate': Timestamp.now(),
-      });
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$name を消費しました'),
-            duration: const Duration(seconds: 1),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
+      await _docRef.update({'isOut': true, 'outDate': Timestamp.now()});
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('更新に失敗しました')));
-      }
+      debugPrint(e.toString());
     }
   }
 
-  // ★「消費を取り消す」処理（確認ダイアログ付き）
   Future<void> _undoMarkAsOut(BuildContext context) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('消費の取り消し'),
-        content: Text('$name を「在庫あり」の状態に戻しますか？'),
+        content: Text('$name を戻しますか？'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('はい'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('いいえ'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('はい')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('いいえ')),
         ],
       ),
     );
-
     if (confirm == true) {
-      try {
-        await _docRef.update({
-          'isOut': false,
-          'outDate': FieldValue.delete(), // 消費日データを消去
-        });
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('在庫ありに戻しました'), duration: Duration(seconds: 1)),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('更新に失敗しました')));
-        }
-      }
+      await _docRef.update({'isOut': false, 'outDate': FieldValue.delete()});
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final surface = AppColors.of(context).surface;
-
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+      decoration: BoxDecoration(color: surface, borderRadius: BorderRadius.circular(14),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 6, offset: const Offset(0, 2))],
       ),
       child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProductDetailPage(docId: docId, isGroup: isGroup, groupId: groupId),
-          ),
-        ),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailPage(docId: docId, isGroup: isGroup, groupId: groupId))),
         borderRadius: BorderRadius.circular(14),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // アイコン部分
-              Opacity(
-                opacity: isOut ? 0.4 : 1.0,
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: activeColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: () {
-                      final code = int.tryParse(icon);
-                      return Icon(
-                        code != null ? IconData(code, fontFamily: 'MaterialIcons') : Icons.inventory_2_outlined,
-                        color: activeColor,
-                        size: 22,
-                      );
-                    }(),
-                  ),
-                ),
+              Container(width: 44, height: 44, decoration: BoxDecoration(color: activeColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                child: Center(child: Icon(Icons.inventory_2_outlined, color: activeColor, size: 22)),
               ),
               const SizedBox(width: 12),
-              // 商品情報
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: isOut ? Colors.grey : Colors.black87,
-                        decoration: isOut ? TextDecoration.lineThrough : null,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isOut ? '在庫なし' : genre,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isOut ? Colors.red.withOpacity(0.6) : Colors.grey[500],
-                        fontWeight: isOut ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // ボタン部分
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(name, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, decoration: isOut ? TextDecoration.lineThrough : null)),
+                Text(genre, style: TextStyle(fontSize: 12, color: Colors.grey)),
+              ])),
               if (!isOut)
-                SizedBox(
-                  height: 32,
-                  child: ElevatedButton(
-                    onPressed: () => _markAsOut(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
-                      elevation: 2,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Text('消費', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
+                ElevatedButton(
+                  onPressed: () => _markAsOut(context),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, elevation: 0),
+                  child: const Text('消費', style: TextStyle(fontSize: 12)),
                 )
               else
-                // ★ 改良：タップできる「消費済み」ラベル
-                InkWell(
-                  onTap: () => _undoMarkAsOut(context),
-                  borderRadius: BorderRadius.circular(6),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: const Text(
-                      '消費済み',
-                      style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
+                TextButton(onPressed: () => _undoMarkAsOut(context), child: const Text('消費済み', style: TextStyle(color: Colors.grey, fontSize: 12))),
             ],
           ),
         ),

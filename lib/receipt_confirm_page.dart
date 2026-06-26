@@ -154,6 +154,8 @@ class _ReceiptConfirmPageState extends State<ReceiptConfirmPage> {
           'icon': item.icon,
           'purchaseDate': now,
           'registeredBy': user.displayName ?? user.email,
+          'isOut': false, // ★ 消費機能のために追加
+          'cycle': item.aiEstimatedDays ?? 0, // ★ 初期周期を追加
           if (item.aiEstimatedDays != null)
             'aiEstimatedDays': item.aiEstimatedDays,
         });
@@ -247,7 +249,7 @@ class _ReceiptConfirmPageState extends State<ReceiptConfirmPage> {
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: colors.accent.withValues(alpha: 0.08),
+        color: colors.accent.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -273,7 +275,7 @@ class _ReceiptConfirmPageState extends State<ReceiptConfirmPage> {
                     style: TextStyle(
                       fontFamily: kFont,
                       fontSize: 12,
-                      color: colors.accent.withValues(alpha: 0.7),
+                      color: colors.accent.withOpacity(0.7),
                     ),
                   ),
               ],
@@ -306,7 +308,7 @@ class _ReceiptConfirmPageState extends State<ReceiptConfirmPage> {
         color: colors.bg,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06), // withValuesから修正（古いバージョン対応）
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -320,7 +322,7 @@ class _ReceiptConfirmPageState extends State<ReceiptConfirmPage> {
             title: const Text('グループに共有する',
                 style: TextStyle(fontFamily: kFont)),
             secondary: Icon(Icons.groups, color: colors.accent),
-            activeThumbColor: colors.accent,
+            activeColor: colors.accent,
             value: _saveToGroup,
             onChanged: (val) => setState(() => _saveToGroup = val),
           ),
@@ -402,7 +404,6 @@ class _ItemCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // アイコン選択ボタン
             GestureDetector(
               onTap: () async {
                 final picked =
@@ -414,10 +415,10 @@ class _ItemCard extends StatelessWidget {
                 height: 44,
                 margin: const EdgeInsets.only(right: 8, top: 8),
                 decoration: BoxDecoration(
-                  color: colors.accent.withValues(alpha: 0.08),
+                  color: colors.accent.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: colors.accent.withValues(alpha: 0.2)),
+                      color: colors.accent.withOpacity(0.2)),
                 ),
                 child: Center(
                   child: () {
@@ -489,7 +490,7 @@ class _ItemCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: item.genre, // initialValueよりvalueの方が状態管理に適しています
+                    value: item.genre,
                     isDense: true,
                     decoration: const InputDecoration(
                       labelText: 'ジャンル',
